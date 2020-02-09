@@ -33,9 +33,8 @@ btrfs subvolume create /mnt/snapshots
 umount -R /mnt
 
 
-mount -t btrfs -o subvol=@,defaults,x-mount.mkdir,compress=lzo,ssd,noatime /dev/nvme0n1p4 /mnt
-mount -t btrfs -o subvol=@home,,defaults,x-mount.mkdir,compress=lzo,ssd,noatime /dev/nvme0n1p4 /mnt/home
-mount -t btrfs -o subvol=snapshots,,defaults,x-mount.mkdir,compress=lzo,ssd,noatime LABEL=system /mnt/.snapshots
+mount -t btrfs -o subvol=@,defaults,x-mount.mkdir,compress=lzo,ssd,noatime /dev/mapper/system /mnt
+mount -t btrfs -o subvol=@home,,defaults,x-mount.mkdir,compress=lzo,ssd,noatime /dev/mapper/system /mnt/home
 mount /dev/mapper/boot /mnt/boot
 mkdir -p /mnt/boot/efi
 mount -o defaults,x-mount.mkdir LABEL=EFI /mnt/boot/efi
