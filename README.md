@@ -16,7 +16,7 @@ cryptsetup luksFormat /dev/nvme0n1p4
 
 cryptsetup open /dev/nvme0n1p2 boot
 cryptsetup open /dev/nvme0n1p3 swap
-cryptsetup open /dev/nvme0n1p3 system
+cryptsetup open /dev/nvme0n1p4 system
 
 
 mkfs.fat -F32 -n EFI /dev/nvme0n1p1
@@ -33,8 +33,8 @@ btrfs subvolume create /mnt/snapshots
 umount -R /mnt
 
 
-mount -t btrfs -o subvol=root,defaults,x-mount.mkdir,compress=lzo,ssd,noatime LABEL=system /mnt
-mount -t btrfs -o subvol=home,,defaults,x-mount.mkdir,compress=lzo,ssd,noatime LABEL=system /mnt/home
+mount -t btrfs -o subvol=@,defaults,x-mount.mkdir,compress=lzo,ssd,noatime /dev/nvme0n1p4 /mnt
+mount -t btrfs -o subvol=@home,,defaults,x-mount.mkdir,compress=lzo,ssd,noatime /dev/nvme0n1p4 /mnt/home
 mount -t btrfs -o subvol=snapshots,,defaults,x-mount.mkdir,compress=lzo,ssd,noatime LABEL=system /mnt/.snapshots
 mount /dev/mapper/boot /mnt/boot
 mkdir -p /mnt/boot/efi
@@ -73,6 +73,8 @@ update-initramfs -k all -u
 GRUB_ENABLE_CRYPTODISK=y
 GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0 noresume"
 GRUB_CMDLINE_LINUX="quiet"
+
+update-initramfs -k all -u
 
 
 ```
