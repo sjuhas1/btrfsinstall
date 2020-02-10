@@ -20,29 +20,32 @@ cryptsetup open /dev/nvme0n1p4 system
 
 
 mkfs.fat -F32 -n EFI /dev/nvme0n1p2
-mkfs.ext4 /dev/mapper/boot
+
 
 mkswap -L swap /dev/mapper/swap
 swapon -L swap
 
+mkfs.btrfs --force --label boot /dev/mapper/boot
 mkfs.btrfs --force --label system /dev/mapper/system
 mount -t btrfs LABEL=system /mnt
 btrfs subvolume create /mnt/root
 btrfs subvolume create /mnt/home
 btrfs subvolume create /mnt/snapshots
 umount -R /mnt
+mount -t btrfs LABEL=boot /mnt
+btrfs subvolume create /mnt/boot
+umount -R /mnt
 
 
-mount -t btrfs -o subvol=@,defaults,x-mount.mkdir,compress=lzo,ssd,noatime /dev/mapper/system /mnt
-mount -t btrfs -o subvol=@home,,defaults,x-mount.mkdir,compress=lzo,ssd,noatime /dev/mapper/system /mnt/home
-mount /dev/mapper/boot /mnt/boot
-mkdir -p /mnt/boot/efi
+mount -t btrfs -o subvol=root,defaults,x-mount.mkdir,compress=lzo,ssd,noatime /dev/mapper/system /mnt
+mount -t btrfs -o subvol=home,defaults,x-mount.mkdir,compress=lzo,ssd,noatime /dev/mapper/system /mnt/home
+mount -t btrfs -o subvol=boot,defaults,x-mount.mkdir,compress=lzo,ssd,noatime /dev/mapper/boot /mnt/boot
 mount -o defaults,x-mount.mkdir LABEL=EFI /mnt/boot/efi
 
-
+sed -i 's/main restricted/main restricted universe multiverse/g' /etc/apt/sources.list
 apt-get update && apt-get install vim debootstrap arch-install-scripts
 
-debootstrap --arch amd64 bionic /mnt http://hu.archive.ubuntu.com/ubuntu
+debootstrap --arch amd64 eoan /mnt http://hu.archive.ubuntu.com/ubuntu
 
 dd if=/dev/random of=/boot/secretkey bs=1 count=4096
 chmod 0400 /boot/secretkey 
@@ -74,6 +77,5 @@ GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0 noresume"
 GRUB_CMDLINE_LINUX="quiet"
 
 update-initramfs -k all -u
-
 
 ```
