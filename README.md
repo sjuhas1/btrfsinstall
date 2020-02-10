@@ -2,24 +2,24 @@
 ```
 sgdisk --zap-all /dev/nvme0n1
 sgdisk --clear \
-  --new=1:0:+1G --typecode=1:ef00 --change-name=1:EFI \
-  --new=2:0:+1G --typecode=2:8300 --change-name=2:boot \
+  --new=2:0:+1G --typecode=2:ef00 --change-name=2:EFI \
+  --new=1:0:+1G --typecode=1:8300 --change-name=1:boot \
   --new=3:0:+16G --typecode=3:8200 --change-name=3:swap \
   --new=4:0:+0 --typecode=4:8300 --change-name=4:system \
   /dev/nvme0n1
 
 sgdisk --print /dev/nvme0n1
 
-cryptsetup luksFormat --type luks1 /dev/nvme0n1p2
+cryptsetup luksFormat --type luks1 /dev/nvme0n1p1
 cryptsetup luksFormat /dev/nvme0n1p3
 cryptsetup luksFormat /dev/nvme0n1p4
 
-cryptsetup open /dev/nvme0n1p2 boot
+cryptsetup open /dev/nvme0n1p1 boot
 cryptsetup open /dev/nvme0n1p3 swap
 cryptsetup open /dev/nvme0n1p4 system
 
 
-mkfs.fat -F32 -n EFI /dev/nvme0n1p1
+mkfs.fat -F32 -n EFI /dev/nvme0n1p2
 mkfs.ext4 /dev/mapper/boot
 
 mkswap -L swap /dev/mapper/swap
